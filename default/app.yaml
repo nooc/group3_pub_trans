@@ -1,0 +1,11 @@
+runtime: python311
+service: default
+
+handlers:
+- url: /
+  static_files: static/index.html
+  upload: static/index.html
+
+- url: /(.*)
+  static_files: static/\1
+  upload: static/(.*)
