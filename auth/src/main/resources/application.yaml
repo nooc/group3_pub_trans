@@ -1,0 +1,35 @@
+logging:
+  level:
+    root: warn
+spring:
+  main:
+    banner-mode: off
+  cloud:
+    gcp:
+      datastore:
+        namespace: micro-services
+      credentials:
+        location: file:///C:/Users/noocn/keys/micro-services-378415-83c3c6430e0a.json
+      project-id: micro-services-378415
+    config:
+      server:
+        git:
+          uri: https://github.com/nooc/group3-config
+          search-paths:
+            - config
+  profiles:
+    active:
+      - logging
+      - endpoints
+      - local
+  security:
+    filter:
+      order: 10
+  config:
+    import: "optional:configserver:https://github.com/nooc/group3-config"
+space:
+  nixus:
+    auth:
+      challengeminutes: 2
+      issuer: space.nixus.micro-services-378415
+      expiryMinutes: 120

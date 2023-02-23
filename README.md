@@ -1,26 +1,27 @@
-# My Google Cloud microservices project
+# Microservices school project
 
-My Google Cloud microservice for various school related project.
+Microservices school project for the course *Backend programming in Java and Spring Boot*.
 
+## About
 
-## Prequisites
+This repository contains two microservices. One for authentication and one for public transport route information. The services are running on Google App Engine Standard with Java17 runtime.
 
-Install Googles Clout SDK
+Both services are written using String Boot and use Googles Datastore as data backend.
 
-## Deploy
+Authentication is achieven using JWT and authorization uses tokens.
 
-Create a Google Cloud project in [Google Console](https://console.cloud.google.com).
+## Deployment info
 
-Enable App Engine and Datastore (datastore mode).
+The project is deployed to a Google Cloud project.
 
-Deploy to Google Standard Environment using gcloud.
+Deploying to Google App Engine using gcloud:
 
 ```console
-cd <root>/<microservice>
-gcloud app deploy --project <project-id>
+cd <microservice path>
+gcloud app deploy --project <google project id>
 ```
 
 Currently deployable services:
 
-* default - Static page.
-* foo - Spring Boot Rest service with Swagger.
+* auth - Auithentication service
+* pubtrans - Public transportation service

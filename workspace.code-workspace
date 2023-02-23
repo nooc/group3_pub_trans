@@ -1,13 +1,14 @@
 {
 	"folders": [
 		{
-			"path": "default"
+			"path": "auth"
 		},
 		{
-			"path": "foo"
+			"path": "pubtrans"
 		}
 	],
 	"settings": {
-		"java.configuration.updateBuildConfiguration": "automatic"
+		"java.configuration.updateBuildConfiguration": "automatic",
+		"java.compile.nullAnalysis.mode": "automatic"
 	}
 }
