@@ -4,24 +4,18 @@ Microservices school project for the course *Backend programming in Java and Spr
 
 ## About
 
-This repository contains two microservices. One for authentication and one for public transport route information. The services are running on Google App Engine Standard with Java17 runtime.
+This repository contains microservices.
+The default (and currently only) service is running on Google App Engine Standard with Java17 runtime.
 
-Both services are written using String Boot and use Googles Datastore as data backend.
+**Default** is written using String Boot and use Googles Datastore as data backend.
 
-Authentication is achieven using JWT and authorization uses tokens.
+Authentication is achieven using an encryptioon challenge and authorization uses JWT bearer tokens.
 
 ## Deployment info
 
-The project is deployed to a Google Cloud project.
-
-Deploying to Google App Engine using gcloud:
+**Default** is deployed to Google App Engine using gcloud like so:
 
 ```console
-cd <microservice path>
+cd default
 gcloud app deploy --project <google project id>
 ```
-
-Currently deployable services:
-
-* auth - Auithentication service
-* pubtrans - Public transportation service
