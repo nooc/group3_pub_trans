@@ -1,7 +1,6 @@
 package space.nixus.pubtrans.component;
 
 import java.util.Base64;
-import java.util.Base64.*;
 import javax.crypto.Cipher;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,26 +22,32 @@ public class Cryptic {
     
     @Autowired
     private Logger logger;
+    private RSAPublicKey publicKey;
+    private RSAPrivateKey privateKey;
 
-    private final PublicKey publicKey;
-    private final PrivateKey privateKey;
-    private final Encoder e64;
-    private final Decoder d64;
+    public RSAPublicKey getPubKey() {
+        if(publicKey==null) {
+            try {
+                publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
+                    .generatePublic(getKeySpec("pub.der", false));
+            } catch(Exception ex) {
+                logger.warn("Private key generation.", ex);
+            }
+        }
+        return publicKey;
+    }
 
-    public Cryptic() {
-        PublicKey _publicKey = null;
-        PrivateKey _privateKey = null;
-        try {
-            var factory = KeyFactory.getInstance("RSA");
-            try { _privateKey = factory.generatePrivate(getKeySpec("priv.der", true)); }
-            catch(Exception ex) { logger.warn("Private key generation.", ex); }
-            try { _publicKey = factory.generatePublic(getKeySpec("pub.der", false)); }
-            catch(Exception ex) { logger.warn("Public key generation.", ex); }
-        } catch(Exception ex) { logger.error("KeyFactory instanciation.", ex); }
-        this.privateKey = _privateKey;
-        this.publicKey = _publicKey;
-        this.e64 = Base64.getEncoder();
-        this.d64 = Base64.getDecoder();
+    public RSAPrivateKey getPrivKey() {
+        if(privateKey==null) {
+            try {
+                privateKey = (RSAPrivateKey) KeyFactory.getInstance("RSA")
+                    .generatePrivate(getKeySpec("priv.der", true));
+            }
+            catch(Exception ex) {
+                logger.warn("Public key generation.", ex);
+            }
+        }
+        return privateKey;
     }
         
     private KeySpec getKeySpec(String resourceName, boolean pk8) {
@@ -63,22 +68,14 @@ public class Cryptic {
         return null;
     }
 
-    public RSAPublicKey getPubKey() {
-        return (RSAPublicKey)publicKey;
-    }
-
-    public RSAPrivateKey getPrivKey() {
-        return (RSAPrivateKey)privateKey;
-    }
-
     public String encrypt(String plain) {
-        return e64.encodeToString(encrypt(plain.getBytes(StandardCharsets.UTF_8)));
+        return Base64.getEncoder().encodeToString(encrypt(plain.getBytes(StandardCharsets.UTF_8)));
     }
 
     public byte[] encrypt(byte[] plain) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            cipher.init(Cipher.ENCRYPT_MODE, getPubKey());
             return cipher.doFinal(plain);
         } catch(Exception ex) {
             logger.error("Cryptic.encrypt()", ex);
@@ -87,14 +84,14 @@ public class Cryptic {
     }
 
     public String decrypt(String encrypted) {
-        var crypted = d64.decode(encrypted);
+        var crypted = Base64.getDecoder().decode(encrypted);
         return new String(decrypt(crypted),StandardCharsets.UTF_8);
     }
 
     public byte[] decrypt(byte[] encrypted) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            cipher.init(Cipher.DECRYPT_MODE, getPrivKey());
             return cipher.doFinal(encrypted);
         } catch(Exception ex) {
             logger.error("Cryptic.decrypt()", ex);

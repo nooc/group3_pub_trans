@@ -1,8 +1,9 @@
 logging:
   level:
-    root: warn
-    org.springframework: warn
-    space.nixus: debug
+    root: ERROR
+    org.springframework.web: ERROR
+    org.hibernate: ERROR
+    space.nixus: DEBUG
 spring:
   main:
     banner-mode: off
@@ -11,7 +12,7 @@ spring:
       order: 10
   cloud:
     gcp:
-      credentials:
+#      credentials:
 #        location: file:///C:/Users/noocn/keys/micro-services-378415-83c3c6430e0a.json
       datastore:
         namespace: micro-services
