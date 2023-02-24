@@ -1,33 +1,37 @@
 package space.nixus.pubtrans.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import jakarta.servlet.http.HttpServletResponse;
+import space.nixus.pubtrans.component.JwtTokenFilter;
+import space.nixus.pubtrans.component.SimpleUserDetailsService;
 
 // https://www.toptal.com/spring/spring-security-tutorial
 
-@EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@Configuration
+public class WebSecurityConfig {
 	
-	private final UserRepository userRepository;
-    private final JwtTokenFilter jwtTokenFilter;
-
-	public WebSecurityConfig(UserRepository users, JwtTokenFilter tokenFilter) {
-        this.userRepository = users;
-        this.jwtTokenFilter = tokenFilter;
-    }
-
-	@Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        // Enable CORS and disable CSRF
-        http = http.cors().and().csrf().disable();
-
-        // Set session management to stateless
-        http = http
+    @Autowired
+    private JwtTokenFilter jwtTokenFilter;
+    
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            // Enable COR. Disable CSRF.
+        return http.cors().and().csrf().disable()
+            // Set session management to stateless
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and();
-
-        // Set unauthorized requests exception handler
-        http = http
+            .and()
+            // Unauthorized requests exception handler
             .exceptionHandling()
             .authenticationEntryPoint(
                 (request, response, ex) -> {
@@ -35,38 +39,31 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         HttpServletResponse.SC_UNAUTHORIZED,
                         ex.getMessage()
                     );
-                }
+                })
+            .and()
+            // Set permissions on endpoints
+            .authorizeHttpRequests()
+            // Public
+            .requestMatchers("/swagger", "/swagger-ui","/swagger-ui/**", "/v3/**")
+            .permitAll()
+            // Admin
+            .requestMatchers("/routes/**")
+            .hasAnyRole("ADMIN","USER")
+            // Private endpoints
+            .anyRequest().authenticated()
+            .and()
+            // JWT token filter
+            .addFilterBefore(
+                jwtTokenFilter,
+                UsernamePasswordAuthenticationFilter.class
             )
-            .and();
-
-        // Set permissions on endpoints
-        http.authorizeRequests()
-            // Our public endpoints
-            .antMatchers("/api/public/**").permitAll()
-            .antMatchers(HttpMethod.GET, "/api/author/**").permitAll()
-            .antMatchers(HttpMethod.POST, "/api/author/search").permitAll()
-            .antMatchers(HttpMethod.GET, "/api/book/**").permitAll()
-            .antMatchers(HttpMethod.POST, "/api/book/search").permitAll()
-            // Our private endpoints
-            .anyRequest().authenticated();
-
-        // Add JWT token filter
-        http.addFilterBefore(
-            jwtTokenFilter,
-            UsernamePasswordAuthenticationFilter.class
-        );
+            .build();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        // TODO configure web security
-    }
-	
 	// Used by Spring Security if CORS is enabled.
     @Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+    CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("*");
@@ -74,5 +71,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
+    }
+
+    @Bean
+    UserDetailsService getUserDetailsService() {
+        return new SimpleUserDetailsService();
     }
 }

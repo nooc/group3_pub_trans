@@ -12,10 +12,10 @@ import lombok.Setter;
 @Setter
 public class Authority implements GrantedAuthority {
 
-    private String name;
+    private String role;
 
     @Override
     public String getAuthority() {
-        return name;
+        return "ROLE_" + role;
     }
 }

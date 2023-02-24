@@ -1,11 +1,15 @@
 package space.nixus.auth.model;
 
 import java.io.Serializable;
+import com.google.cloud.spring.data.datastore.core.mapping.Unindexed;
 
 public class UserParams implements Serializable {
     private String email;
+    @Unindexed
     private String password;
+    @Unindexed
 	private String role;
+    @Unindexed
 	private Boolean enabled;
 
     public UserParams() {

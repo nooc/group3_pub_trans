@@ -1,11 +1,13 @@
 package space.nixus.auth.component;
 
 import java.util.Base64;
+import java.util.Base64.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -27,18 +29,25 @@ public class Cryptic {
     @Autowired
     private Logger logger;
 
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
+    private final PublicKey publicKey;
+    private final PrivateKey privateKey;
+    private final Encoder e64;
+    private final Decoder d64;
 
     public Cryptic() {
+        PublicKey _publicKey = null;
+        PrivateKey _privateKey = null;
         try {
             var factory = KeyFactory.getInstance("RSA");
-            this.privateKey = factory.generatePrivate(getKeySpec("priv.der", true));
-            this.publicKey = factory.generatePublic(getKeySpec("pub.der", false));
-        } catch (Exception e) {
-            this.publicKey = null;
-            this.privateKey = null;
-        }
+            try { _privateKey = factory.generatePrivate(getKeySpec("priv.der", true)); }
+            catch(Exception ex) { logger.warn("Private key generation.", ex); }
+            try { _publicKey = factory.generatePublic(getKeySpec("pub.der", false)); }
+            catch(Exception ex) { logger.warn("Public key generation.", ex); }
+        } catch(Exception ex) { logger.error("KeyFactory instanciation.", ex); }
+        this.privateKey = _privateKey;
+        this.publicKey = _publicKey;
+        this.e64 = Base64.getEncoder();
+        this.d64 = Base64.getDecoder();
     }
         
     private KeySpec getKeySpec(String resourceName, boolean pk8) {
@@ -54,8 +63,7 @@ public class Cryptic {
                 return spec;
             }
         } catch (Exception ex) {
-            logger.error("getKeySpec", ex);
-            ex.printStackTrace();
+            logger.error("Cryptic.getKeySpec()", ex);
         }
         return null;
     }
@@ -68,24 +76,34 @@ public class Cryptic {
         return (RSAPrivateKey)privateKey;
     }
 
-    public String encryptToString(String plain) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-        return Base64.getEncoder().encodeToString(encrypt(plain.getBytes()));
+    public String encrypt(String plain) {
+        return e64.encodeToString(encrypt(plain.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public byte[] encrypt(byte[] plain) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        return cipher.doFinal(plain);
+    public byte[] encrypt(byte[] plain) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            return cipher.doFinal(plain);
+        } catch(Exception ex) {
+            logger.error("Cryptic.encrypt()", ex);
+        }
+        return null;
     }
 
-    public String decryptToString(String enctypted) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-        var crypted = Base64.getDecoder().decode(enctypted);
-        return new String(decrypt(crypted));
+    public String decrypt(String encrypted) {
+        var crypted = d64.decode(encrypted);
+        return new String(decrypt(crypted),StandardCharsets.UTF_8);
     }
 
-    public byte[] decrypt(byte[] enctypted) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        return cipher.doFinal(enctypted);
+    public byte[] decrypt(byte[] encrypted) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            return cipher.doFinal(encrypted);
+        } catch(Exception ex) {
+            logger.error("Cryptic.decrypt()", ex);
+        }
+        return null;
     }
 }

@@ -59,7 +59,11 @@ public class UserService {
     }
 
     public User findByUsername(String username) {
-        return userRepository.findByEmail(username);
+        var users = userRepository.findByEmail(username);
+        if(users.size()==0) {
+            throw new UserNotFoundError();
+        }
+        return users.get(0);
     }
 
     public User findById(long id) {

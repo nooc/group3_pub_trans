@@ -1,6 +1,6 @@
 package space.nixus.pubtrans.service;
 
-import space.nixus.pubtrans.model.Token;
+import space.nixus.pubtrans.model.User;
 import space.nixus.pubtrans.repository.TokenRepository;
 import java.util.ArrayList;
 import java.util.List;

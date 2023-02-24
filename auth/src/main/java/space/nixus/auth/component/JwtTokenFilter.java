@@ -32,7 +32,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private Logger logger;
     @Autowired
     private Cryptic cryptic;
-    @Value("space.nixus.auth.issuer:space.nixus")
+    @Value("${space.nixus.auth.issuer:space.nixus}")
     private String issuer;
 
     @Override
@@ -51,7 +51,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             return;
         }
         // Get user identity and set it on the spring security context
-        User user = userRepository.findByEmail(token.getClaim("username").asString());
+        User user = userRepository.findByEmail(token.getClaim("username").asString()).get(0);
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

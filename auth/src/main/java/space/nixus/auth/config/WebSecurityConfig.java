@@ -43,13 +43,10 @@ public class WebSecurityConfig {
             .and()
             // Set permissions on endpoints
             .authorizeHttpRequests()
-            // Public endpoints
-            .requestMatchers(
-                "/auth/**",
-                "/swagger-ui",
-                "/swagger-ui/**",
-                "/v3/**").permitAll()
-            // Admin endpoints
+            // Public
+            .requestMatchers("/swagger", "/swagger-ui","/swagger-ui/**", "/v3/**", "/auth/*")
+            .permitAll()
+            // Admin
             .requestMatchers("/users/**")
             .hasAnyRole("ADMIN")
             // Private endpoints
