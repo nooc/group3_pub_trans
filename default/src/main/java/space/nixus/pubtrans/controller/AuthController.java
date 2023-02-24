@@ -15,7 +15,7 @@ import space.nixus.pubtrans.repository.ChallengeRepository;
 import space.nixus.pubtrans.service.UserService;
 import space.nixus.pubtrans.component.Cryptic;
 import space.nixus.pubtrans.error.InternalError;
-import space.nixus.pubtrans.error.OperationExpiredError;
+import space.nixus.pubtrans.error.ExpiredError;
 import space.nixus.pubtrans.error.UnauthorizedError;
 import space.nixus.pubtrans.error.UserNotFoundError;
 import space.nixus.pubtrans.model.Challenge;
@@ -72,7 +72,7 @@ public class AuthController {
                     var challenge = challenges.get(0);
                     // Expired?
                     if(Instant.ofEpochMilli(challenge.getExpires()).isBefore(Instant.now())) {
-                        throw new OperationExpiredError();
+                        throw new ExpiredError();
                     }
                     User user = userService.findById(challenge.getUserId());
                     if(user!=null) {
