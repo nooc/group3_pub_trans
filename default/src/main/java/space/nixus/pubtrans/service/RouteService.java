@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.TravelMode;
+import com.google.maps.model.DirectionsLeg;
+import com.google.maps.model.DirectionsStep;
+import com.google.maps.model.DirectionsRoute;
 
 import space.nixus.pubtrans.model.Alert;
 import space.nixus.pubtrans.model.AlertParam;
@@ -47,14 +50,12 @@ public class RouteService {
         if(result==null) {
             throw new InternalError();
         }
+        
         for(var gRoute : result.routes) {
-            var route = new Route();
-            // TODO: Get start and stop
-
-            // TODO: process route steps.
-            // if first position is not transit station, use external service to find route from start to first station
-            // and do the same on the destination side.
-
+            // Create route with source and destination.
+            var route = new Route(getSource(gRoute), getDestination(gRoute));
+            // Get route steps.
+            processLegs(route, gRoute.legs);
             // Add result
             routes.add(route);
         }
@@ -84,5 +85,48 @@ public class RouteService {
 
     public boolean deleteAlert(Long alertId) {
         throw new NotImplementedException();
+    }
+
+    /**
+     * Get source adress.
+     * 
+     * @param route
+     * @return
+     */
+    private static String getSource(DirectionsRoute route) {
+        return route.legs[0].startAddress;
+    }
+
+    /**
+     * Get destination adress.
+     * 
+     * @param route
+     * @return
+     */
+    private static String getDestination(DirectionsRoute route) {
+        return route.legs[route.legs.length-1].endAddress;
+    }
+
+    private static void processLegs(Route route, DirectionsLeg[] legs) {
+        for (var leg : legs) {
+            processSteps(route, leg.steps);
+        }
+    }
+
+    private static void processSteps(Route route, DirectionsStep[] steps) {
+        for (var step : steps) {
+            if(step.travelMode.equals(TravelMode.WALKING)) {
+                if(queryWalk(route,step)) {
+                    // Queried wakl
+                    continue;
+                }
+            }
+            route.addStep(step.duration.inSeconds * 1000, step.htmlInstructions);
+        }
+    }
+
+    private static boolean queryWalk(Route route, DirectionsStep step) {
+        // query external service
+        return false;
     }
 }

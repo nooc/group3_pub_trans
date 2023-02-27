@@ -29,7 +29,7 @@ public class Cryptic {
                 publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
                     .generatePublic(getKeySpec("pub.der", false));
             } catch(Exception ex) {
-                logger.warn("Private key generation.", ex);
+                logger.warn("Private key generation error.", ex);
             }
         }
         return publicKey;
@@ -42,7 +42,7 @@ public class Cryptic {
                     .generatePrivate(getKeySpec("priv.der", true));
             }
             catch(Exception ex) {
-                logger.warn("Public key generation.", ex);
+                logger.warn("Public key generation error.", ex);
             }
         }
         return privateKey;
@@ -61,7 +61,7 @@ public class Cryptic {
                 return spec;
             }
         } catch (Exception ex) {
-            logger.error("Cryptic.getKeySpec()", ex);
+            logger.error("Error in Cryptic.getKeySpec()", ex);
         }
         return null;
     }
@@ -76,14 +76,19 @@ public class Cryptic {
             cipher.init(Cipher.ENCRYPT_MODE, getPubKey());
             return cipher.doFinal(plain);
         } catch(Exception ex) {
-            logger.error("Cryptic.encrypt()", ex);
+            logger.error("Error in Cryptic.encrypt()", ex);
         }
         return null;
     }
 
     public String decrypt(String encrypted) {
-        var crypted = Base64.getDecoder().decode(encrypted);
-        return new String(decrypt(crypted),StandardCharsets.UTF_8);
+        try {
+            var crypted = Base64.getDecoder().decode(encrypted.getBytes(StandardCharsets.UTF_8));
+            return new String(decrypt(crypted), StandardCharsets.UTF_8);
+        } catch(Exception ex) {
+            logger.error("Cryptic.decrypt(String)", ex);
+        }
+        return null;
     }
 
     public byte[] decrypt(byte[] encrypted) {
@@ -92,7 +97,7 @@ public class Cryptic {
             cipher.init(Cipher.DECRYPT_MODE, getPrivKey());
             return cipher.doFinal(encrypted);
         } catch(Exception ex) {
-            logger.error("Cryptic.decrypt()", ex);
+            logger.error("Error in Cryptic.decrypt()", ex);
         }
         return null;
     }

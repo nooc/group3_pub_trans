@@ -3,6 +3,7 @@ package space.nixus.pubtrans.controller;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.Map;
+import java.util.ArrayList;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,7 @@ import space.nixus.pubtrans.error.UserNotFoundError;
 import space.nixus.pubtrans.model.Challenge;
 import space.nixus.pubtrans.model.ChallengeParam;
 import space.nixus.pubtrans.model.ChallengeResponse;
-import space.nixus.pubtrans.model.RequestUser;
+import space.nixus.pubtrans.model.AuthRequest;
 import space.nixus.pubtrans.model.TokenResponse;
 import space.nixus.pubtrans.model.User;
 
@@ -45,22 +46,29 @@ public class AuthController {
     private Algorithm algorithm = null;
     
     @PostMapping("/auth/request")
-    ChallengeParam requestChallenge(@RequestBody RequestUser request) {
+    ChallengeParam requestChallenge(@RequestBody AuthRequest request) {
         User user = userService.findByUsername(request.getUser());
+        var now = Instant.now();
         if(user == null) {
             throw new UserNotFoundError();
         }
         try {
+            // Delete expired.
+            var keys = challengeRepository.findExpired(now.toEpochMilli());
+            var ids = new ArrayList<Long>();
+            keys.stream().forEach( key -> ids.add(key.getId()) );
+            challengeRepository.deleteAllById(ids);
+
             var plain = UUID.randomUUID().toString();
             var crypted = cryptic.encrypt(plain);
-            var expires = Instant.now().plusSeconds(challengeMinutes * 60).toEpochMilli();
+            var expires = now.plusSeconds(challengeMinutes * 60).toEpochMilli();
             var challenge = new Challenge(null, user.getId(), plain, crypted, expires);
             challenge = challengeRepository.save(challenge);
             return new ChallengeParam(challenge.getValue());
         } catch(Exception ex) {
             logger.error("requestChallenge", ex);
+            throw new InternalError();
         }
-        throw new InternalError();
     }
 
     @PostMapping("/auth/validate")

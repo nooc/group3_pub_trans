@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class RequestUser implements Serializable {
+public class AuthRequest implements Serializable {
     
     private String user;
 }
