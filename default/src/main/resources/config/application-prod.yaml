@@ -1,0 +1,8 @@
+logging:
+  level:
+    root: ERROR
+    "org.springframework": ERROR
+    "org.hibernate": ERROR
+    "space.nixus": ERROR
+  main:
+    banner-mode: off

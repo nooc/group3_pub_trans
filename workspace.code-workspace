@@ -1,7 +1,12 @@
 {
 	"folders": [
 		{
-			"path": "default"
+			"path": "default",
+			"name": "Public Transport"
+		},
+		{
+			"path": "test",
+			"name": "Python Tests"
 		}
 	],
 	"settings": {

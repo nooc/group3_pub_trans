@@ -1,0 +1,4 @@
+group3:
+  services:
+    pubtrans:
+      uri: https://micro-services-378415.appspot.com
