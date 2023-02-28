@@ -17,7 +17,7 @@ Authentication is achieven using an encryptioon challenge and authorization uses
 
 ```console
 cd default
-gcloud app deploy --project &lt;google project id&gt;
+gcloud app deploy --project <google project id>
 ```
 
 ## Authentication flow
