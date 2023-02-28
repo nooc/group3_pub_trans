@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+//import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import space.nixus.pubtrans.model.Alert;
 import space.nixus.pubtrans.model.AlertParam;
+import space.nixus.pubtrans.model.FavoredRoute;
 import space.nixus.pubtrans.model.Route;
 import space.nixus.pubtrans.model.RouteQuery;
 import space.nixus.pubtrans.model.User;
@@ -20,7 +21,8 @@ import space.nixus.pubtrans.service.RouteService;
 import space.nixus.pubtrans.error.*;
 
 @RestController
-@SecurityRequirement(name = "bearer")
+//TODO enable
+//@SecurityRequirement(name = "bearer")
 public class RouteController {
 
     @Autowired
@@ -42,20 +44,22 @@ public class RouteController {
         return routeService.queryRoute(query);
     }
 
-    @PostMapping("/routes/favor/{id}")
-    String favorRoute(@PathVariable("id") Long id) {
-        if(routeService.favorRoute(getUser().getId(), id)) {
-            return "OK";
-        }
-        throw new RouteNotFoundError();
+    @GetMapping("/routes/favored")
+    List<FavoredRoute> favorRoute() {
+        return routeService.listFavored(getUser().getId());
     }
 
-    @DeleteMapping("/routes/unfavor/{id}")
+    @PostMapping("/routes/favored/add")
+    FavoredRoute favorRoute(@RequestBody RouteQuery query) {
+        return routeService.favorRoute(getUser().getId(), query.getSource(), query.getDestination());
+    }
+
+    @DeleteMapping("/routes/favored/del/{id}")
     String unfavorRoute(@PathVariable("id") Long id) {
         if(routeService.unfavorRoute(id)) {
             return "OK";
         }
-        throw new RouteNotFoundError();
+        throw new FavNotFoundError();
     }
 
     @GetMapping("/alerts/list")

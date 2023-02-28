@@ -49,6 +49,10 @@ public class WebSecurityConfig {
             // Admin
             .requestMatchers("/users/**")
             .hasAnyRole("ADMIN")
+            //TODO Remove
+            // Public
+            .requestMatchers("/routes/*")
+            .permitAll()
             // Private endpoints
             .anyRequest().authenticated()
             .and()

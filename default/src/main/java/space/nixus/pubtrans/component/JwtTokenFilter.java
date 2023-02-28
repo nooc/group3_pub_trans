@@ -34,6 +34,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private Cryptic cryptic;
     @Value("${space.nixus.pubtrans.issuer:space.nixus}")
     private String issuer;
+    // An easy way to invalidate existing tokens by changing this value.
+    @Value("${space.nixus.pubtrans.unique:space.nixus}")
+    private String jwtUnique; 
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -65,6 +69,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             JWTVerifier verifier = JWT.require(algorithm)
                     // specify an specific claim validations
                     .withIssuer(issuer)
+                    .withClaim("unique", jwtUnique)
                     // reusable verifier instance
                     .build();
             return verifier.verify(token);

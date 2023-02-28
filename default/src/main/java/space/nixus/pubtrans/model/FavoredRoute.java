@@ -1,6 +1,5 @@
 package space.nixus.pubtrans.model;
 
-import java.io.Serializable;
 import org.springframework.data.annotation.Id;
 import com.google.cloud.spring.data.datastore.core.mapping.Entity;
 import lombok.AllArgsConstructor;
@@ -13,10 +12,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "favored")
-public class FavoredRoute implements Serializable {
+public class FavoredRoute extends RouteQuery {
 
     @Id
     private Long id;
-    private Long groupId;
-    private Long routeId;
+    private Long userId;
+    private String source;
+    private String destination;
 }

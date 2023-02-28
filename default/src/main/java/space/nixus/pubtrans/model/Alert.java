@@ -17,8 +17,8 @@ public class Alert extends AlertParam {
      * @param expires
      * @param routeId
      */
-    public Alert(Long id, String description, Long expires, Long routeId) {
-        super(description, expires, routeId);
+    public Alert(Long id, String description, Long expires) {
+        super(description, expires);
         this.id = id;
     }
 

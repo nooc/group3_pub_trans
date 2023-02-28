@@ -14,5 +14,4 @@ public class AlertParam {
     @Unindexed
     private String description;
     private Long expires;
-    private Long routeId;
 }

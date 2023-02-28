@@ -19,3 +19,4 @@ space:
       challenge-minutes: 2
       issuer: space.nixus.micro-services-378415
       expiry-minutes: 120
+      unique: 7beb1f70-b96f-4b41-841a-acf5e2da6586

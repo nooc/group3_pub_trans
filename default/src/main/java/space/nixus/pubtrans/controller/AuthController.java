@@ -41,6 +41,9 @@ public class AuthController {
     private int challengeMinutes;
     @Value("${space.nixus.pubtrans.issuer:space.nixus}")
     private String issuer;
+    // An easy way to invalidate existing tokens by changing this value.
+    @Value("${space.nixus.pubtrans.unique:space.nixus}")
+    private String jwtUnique; 
     @Value("${space.nixus.pubtrans.expiry-minutes:10}")
     private long expiryMinutes;
     private Algorithm algorithm = null;
@@ -58,7 +61,7 @@ public class AuthController {
             var ids = new ArrayList<Long>();
             keys.stream().forEach( key -> ids.add(key.getId()) );
             challengeRepository.deleteAllById(ids);
-
+            // Challenge
             var plain = UUID.randomUUID().toString();
             var crypted = cryptic.encrypt(plain);
             var expires = now.plusSeconds(challengeMinutes * 60).toEpochMilli();
@@ -92,6 +95,7 @@ public class AuthController {
                                 "typ","JWT"
                             ))
                             .withClaim("username", user.getEmail())
+                            .withClaim("unique", jwtUnique)
                             .withIssuer(issuer)
                             .withExpiresAt(Instant.now().plusSeconds(expiryMinutes*60))
                             .sign(getAlgorithm())
