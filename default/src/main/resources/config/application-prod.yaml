@@ -3,6 +3,7 @@ logging:
     root: ERROR
     "org.springframework": ERROR
     "org.hibernate": ERROR
-    "space.nixus": ERROR
+    "space.nixus": DEBUG
+spring:
   main:
     banner-mode: off

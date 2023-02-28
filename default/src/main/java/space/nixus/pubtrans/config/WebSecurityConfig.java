@@ -14,6 +14,7 @@ import org.springframework.web.filter.CorsFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import space.nixus.pubtrans.component.JwtTokenFilter;
 import space.nixus.pubtrans.component.SimpleUserDetailsService;
+import space.nixus.pubtrans.component.ServiceHeaderFilter;
 
 // https://www.toptal.com/spring/spring-security-tutorial
 
@@ -22,6 +23,8 @@ public class WebSecurityConfig {
 	
     @Autowired
     private JwtTokenFilter jwtTokenFilter;
+    @Autowired
+    private ServiceHeaderFilter specialHeader;
     
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -47,12 +50,8 @@ public class WebSecurityConfig {
             .requestMatchers("/swagger", "/swagger-ui","/swagger-ui/**", "/v3/**", "/auth/*")
             .permitAll()
             // Admin
-            .requestMatchers("/users/**")
+            .requestMatchers("/users/**", "/internals/**")
             .hasAnyRole("ADMIN")
-            //TODO Remove
-            // Public
-            .requestMatchers("/routes/*")
-            .permitAll()
             // Private endpoints
             .anyRequest().authenticated()
             .and()
@@ -61,6 +60,7 @@ public class WebSecurityConfig {
                 jwtTokenFilter,
                 UsernamePasswordAuthenticationFilter.class
             )
+            .addFilterBefore(specialHeader, UsernamePasswordAuthenticationFilter.class)
             .build();
     }
 

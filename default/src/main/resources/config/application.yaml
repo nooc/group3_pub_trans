@@ -1,15 +1,13 @@
 spring:
   profiles:
     active:
-      - dev
+      - prod
       - endpoints
   security:
     filter:
       order: 10
   cloud:
     gcp:
-      credentials:
-        location: classpath:micro-services-378415-83c3c6430e0a.json
       datastore:
         namespace: micro-services
       project-id: micro-services-378415

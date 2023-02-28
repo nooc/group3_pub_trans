@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-//import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import space.nixus.pubtrans.model.Alert;
 import space.nixus.pubtrans.model.AlertParam;
 import space.nixus.pubtrans.model.FavoredRoute;
@@ -21,8 +21,7 @@ import space.nixus.pubtrans.service.RouteService;
 import space.nixus.pubtrans.error.*;
 
 @RestController
-//TODO enable
-//@SecurityRequirement(name = "bearer")
+@SecurityRequirement(name = "bearer")
 public class RouteController {
 
     @Autowired

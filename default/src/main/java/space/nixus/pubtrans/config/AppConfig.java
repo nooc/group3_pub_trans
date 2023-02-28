@@ -15,7 +15,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AppConfig {
 
-    @Value("${space.nixus.micro-services-378415.maps}")
+    @Value("${MAPS_KEY}")
     private String mapsKey;
 
     @Bean

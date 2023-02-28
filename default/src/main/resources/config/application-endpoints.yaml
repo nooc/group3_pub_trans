@@ -3,4 +3,4 @@ group3:
     pubtrans:
       uri: https://micro-services-378415.appspot.com
     walking:
-      uri: http://...
+      uri: http://abc

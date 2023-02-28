@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.cloud.spring.data.datastore.core.mapping.Entity;
 
 @Entity(name = "user")
@@ -14,6 +16,7 @@ public class User extends UserParams implements UserDetails {
 	@Id
 	private Long id;
 	@Transient
+	@JsonIgnore
 	private Collection<Authority> authorities;
 
 	public User() {
