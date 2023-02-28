@@ -77,39 +77,38 @@ import java.security.spec.X509EncodedKeySpec;
 
 class Example {
 
-	private RSAPublicKey publicKey;
-  private Cipher cipher;
-  
-	public Example() {
-	// Get cipher for encryptiong.
-	this.cipher = Cipher.getInstance("RSA");
-  
-	// Get key in resources folder.
-	var file = ResourceUtils.getFile("classpath:pub.der");
-  
-	// Read key
-	try (var strm = new FileInputStream(file)) {
-  
-    var bytes = strm.readAllBytes();
+    private RSAPublicKey publicKey;
+    private Cipher cipher;
     
-    // Create the RSAPublicKey.
-    KeySpec spec = new X509EncodedKeySpec(bytes, "RSA");
-    publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
-    	.generatePublic(getKeySpec("pub.der", false));
+    public Example() {
+        // Get cipher for encryptiong.
+        this.cipher = Cipher.getInstance("RSA");
+        
+        // Get key in resources folder.
+        var file = ResourceUtils.getFile("classpath:pub.der");
+        
+        // Read key
+        try (var strm = new FileInputStream(file)) {
+            
+            var bytes = strm.readAllBytes();
+            
+            // Create the RSAPublicKey.
+            KeySpec spec = new X509EncodedKeySpec(bytes, "RSA");
+            publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
+            .generatePublic(spec);
+        }
     }
-  }
 
-  // encrypt value, for example "f25aada6-b270-4f4e-8d50-64049e1f6b25".
-	public String encrypt(String value) {
-    // Init encryption.
-    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-    
-    // Encrypt in one go.
-    byte[] encryptedBytes = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
-    
-    // Encrypted and base64 converter string.
-    return Base64.getEncoder().encodeToString(encryptedBytes);
-  }
+    // encrypt value, for example "f25aada6-b270-4f4e-8d50-64049e1f6b25".
+    public String encrypt(String value) {
+        // Init encryption.
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        
+        // Encrypt in one go.
+        byte[] encryptedBytes = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
+        
+        // Encrypted and base64 converter string.
+        return Base64.getEncoder().encodeToString(encryptedBytes);
+    }
 }
-
 ```
