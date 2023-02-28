@@ -100,7 +100,7 @@ class Example {
   }
 
   // encrypt value, for example "f25aada6-b270-4f4e-8d50-64049e1f6b25".
-	public static String encrypt(String value) {
+	public String encrypt(String value) {
     // Init encryption.
     cipher.init(Cipher.ENCRYPT_MODE, publicKey);
     
