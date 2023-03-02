@@ -3,4 +3,5 @@ group3:
     pubtrans:
       uri: https://micro-services-378415.appspot.com
     walking:
-      uri: http://abc
+      uri: https://microservicebackend-backend.azuremicroservices.io
+      key: fatso

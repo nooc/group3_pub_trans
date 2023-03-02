@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.threeten.bp.Instant;
 
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
@@ -165,27 +166,28 @@ public class RouteService {
             steps.removeLast();
             tailWalkStart = dstep.startLocation;
         }
+
         // private head steps
         if(headWalkEnd!= null) {
             LatLng start = gRoute.legs[0].startLocation;
             var results = walkingService.query(start, headWalkEnd);
-            // TODO add steps
+            results.getPath().getSteps().forEach(s -> route.addStep(s));
+            route.addDuration((long)(results.getPath().getEstimatedArrivalTime()*1000));
+            route.setWeather(results.getWeather());
         }
         
         // google steps
         for(var step : steps) {
-            route.addStep(step.duration.inSeconds*1000, step.htmlInstructions);
+            route.addStep(step.htmlInstructions);
+            route.addDuration(step.duration.inSeconds*1000);
         }
         // private tail steps
         if(tailWalkStart!=null) {
             LatLng end = gRoute.legs[gRoute.legs.length-1].endLocation;
             var results = walkingService.query(tailWalkStart, end);
-            // TODO add steps
+            results.getPath().getSteps().forEach(s -> route.addStep(s));
+            route.addDuration((long)(results.getPath().getEstimatedArrivalTime()*1000));
+            route.setWeather(results.getWeather());
         }
-    }
-
-    private static boolean queryWalk(Route route, DirectionsStep step) {
-        // query external service
-        return false;
     }
 }

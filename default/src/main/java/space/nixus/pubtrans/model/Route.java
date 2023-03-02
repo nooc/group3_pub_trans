@@ -21,19 +21,18 @@ public class Route implements Serializable {
         private Long time;
     }
 
-    private Long id;
     private Long created;  // EpochMilli
     private Long duration; // Millis
     private AddressPoint source;
     private AddressPoint dest;
     private List<String> steps;
+    private String weather;
 
     /**
      * @param source
      * @param destination
      */
     public Route(AddressPoint source, AddressPoint dest) {
-        this.id = null;
         this.created = Instant.now().toEpochMilli();
         this.duration = 0L;
         this.source = source;
@@ -46,14 +45,19 @@ public class Route implements Serializable {
      */
     public Route() {
         super();
-        this.id = null;
         this.created = Instant.now().toEpochMilli();
         this.duration = 0L;
         this.steps = new ArrayList<>();
     }
 
-    public void addStep(long duration, String description) {
-        this.duration += duration;
+    public void addStep(String description) {
         this.steps.add(description);
+    }
+
+    /*
+     * Duration in millis.
+     */
+    public void addDuration(long duration) {
+        this.duration += duration;
     }
 }
