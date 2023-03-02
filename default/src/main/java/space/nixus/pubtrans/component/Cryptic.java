@@ -2,7 +2,6 @@ package space.nixus.pubtrans.component;
 
 import java.util.Base64;
 import javax.crypto.Cipher;
-import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
@@ -13,16 +12,24 @@ import java.security.spec.X509EncodedKeySpec;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
+
+import space.nixus.pubtrans.interfaces.IResourceRetriever;
+import space.nixus.pubtrans.interfaces.ICryptic;
 
 @Component
-public class Cryptic {
+public final class Cryptic implements ICryptic {
     
     @Autowired
     private Logger logger;
+    @Autowired
+    private IResourceRetriever resourceRetriever;
     private RSAPublicKey publicKey;
     private RSAPrivateKey privateKey;
 
+    /**
+     * 
+     * @return
+     */
     public RSAPublicKey getPubKey() {
         if(publicKey==null) {
             try {
@@ -35,6 +42,10 @@ public class Cryptic {
         return publicKey;
     }
 
+    /**
+     * 
+     * @return
+     */
     public RSAPrivateKey getPrivKey() {
         if(privateKey==null) {
             try {
@@ -48,28 +59,39 @@ public class Cryptic {
         return privateKey;
     }
         
+    /**
+     * 
+     * @param resourceName
+     * @param pk8
+     * @return
+     */
     private KeySpec getKeySpec(String resourceName, boolean pk8) {
         try {
-            var file = ResourceUtils.getFile("classpath:" + resourceName);
-            try (var strm = new FileInputStream(file)) {
-                var bytes = strm.readAllBytes();
-                KeySpec spec;
-                if (pk8)
-                    spec = new PKCS8EncodedKeySpec(bytes, "RSA");
-                else
-                    spec = new X509EncodedKeySpec(bytes, "RSA");
-                return spec;
-            }
+            var bytes = resourceRetriever.getResourceAsBytes(resourceName);
+            KeySpec spec;
+            if (pk8)
+                spec = new PKCS8EncodedKeySpec(bytes, "RSA");
+            else
+                spec = new X509EncodedKeySpec(bytes, "RSA");
+            return spec;
         } catch (Exception ex) {
             logger.error("Error in Cryptic.getKeySpec()", ex);
         }
         return null;
     }
 
+    /**
+     * 
+     */
     public String encrypt(String plain) {
         return Base64.getEncoder().encodeToString(encrypt(plain.getBytes(StandardCharsets.UTF_8)));
     }
 
+    /**
+     * 
+     * @param plain
+     * @return
+     */
     public byte[] encrypt(byte[] plain) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
@@ -81,6 +103,11 @@ public class Cryptic {
         return null;
     }
 
+    /**
+     * 
+     * @param encrypted
+     * @return
+     */
     public String decrypt(String encrypted) {
         try {
             var crypted = Base64.getDecoder().decode(encrypted.getBytes(StandardCharsets.UTF_8));
@@ -91,6 +118,11 @@ public class Cryptic {
         return null;
     }
 
+    /**
+     * 
+     * @param encrypted
+     * @return
+     */
     public byte[] decrypt(byte[] encrypted) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");

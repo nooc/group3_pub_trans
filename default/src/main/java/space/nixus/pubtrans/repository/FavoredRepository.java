@@ -7,4 +7,6 @@ import space.nixus.pubtrans.model.FavoredRoute;
 public interface FavoredRepository extends DatastoreRepository<FavoredRoute,Long> {
 
     List<FavoredRoute> findAllByUserId(Long usderId);
+
+    void deleteByUserId(Long userId);
 }

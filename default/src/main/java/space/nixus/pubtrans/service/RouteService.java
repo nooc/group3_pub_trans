@@ -2,6 +2,7 @@ package space.nixus.pubtrans.service;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,9 @@ import space.nixus.pubtrans.repository.AlertRepository;
 import space.nixus.pubtrans.repository.FavoredRepository;
 
 @Service
-public class RouteService {
+public final class RouteService {
 
+    private static final int MAX_RESULT_COUNT = 2;
     @Autowired
     AlertRepository alertRepository;
     @Autowired
@@ -57,46 +59,78 @@ public class RouteService {
         if(result==null) {
             throw new InternalError();
         }
-        
+        // get MAX_RESULT_COUNT routes
+        int count = 0;
         for(var gRoute : result.routes) {
             // Create route with source and destination.
             var route = new Route(getSource(gRoute), getDestination(gRoute));
             // Get route steps.
             flattenRoute(route, gRoute);
-            
             // Add result
             routes.add(route);
+            if(++count > MAX_RESULT_COUNT) { break; }
         }
         return routes;
     }
     
+    /**
+     * Favor a route.
+     * @param userId
+     * @param source
+     * @param destination
+     * @return
+     */
     public FavoredRoute favorRoute(Long userId, String source, String destination) {
         var fav = new FavoredRoute(null, userId, source, destination);
         return favoredRepository.save(fav);
     }
 
+    /**
+     * Remove a vavored route.
+     * @param favoredId
+     * @return
+     */
     public boolean unfavorRoute(Long favoredId) {
         favoredRepository.deleteById(favoredId);
         return true;
     }
 
+    /**
+     * List favored.
+     * @param userId
+     * @return
+     */
     public List<FavoredRoute> listFavored(Long userId) {
         return favoredRepository.findAllByUserId(userId);
     }
 
 
+    /**
+     * List registered alerts.
+     * @return
+     */
     public List<Alert> listAlerts() {
         var alerts = new ArrayList<Alert>();
         alertRepository.findAll().forEach(alert -> alerts.add(alert));
         return alerts;
     }
 
+    /**
+     * Add an alert.
+     * @param param
+     * @return
+     */
     public Alert addAlert(AlertParam param) {
         var alert = new Alert(null, param.getDescription(), param.getExpires());
         return alertRepository.save(alert);
     }
 
-    
+    /**
+     * Update an alert.
+     * @param id
+     * @param param
+     * @return
+     */
     public Alert updateAlert(Long id, AlertParam param) {
         var alertOpt = alertRepository.findById(id);
         if(!alertOpt.isPresent()) {
@@ -135,7 +169,7 @@ public class RouteService {
         var index = route.legs.length-1;
         return new Route.AddressPoint(route.legs[index].endAddress,
             route.legs[index].endLocation,
-            route.legs[0].arrivalTime.toEpochSecond()*1000);
+            0L);
     }
 
     /**
@@ -147,6 +181,7 @@ public class RouteService {
      */
     private void flattenRoute(Route route, DirectionsRoute gRoute) {
         LinkedList<DirectionsStep> steps = new LinkedList<>();
+
         // flatten
         for(var leg : gRoute.legs) {
             for(var step : leg.steps) {
@@ -176,18 +211,49 @@ public class RouteService {
             route.setWeather(results.getWeather());
         }
         
-        // google steps
-        for(var step : steps) {
-            route.addStep(step.htmlInstructions);
-            route.addDuration(step.duration.inSeconds*1000);
-        }
+        // transit steps
+        addTransitSteps(route, steps.toArray(new DirectionsStep[steps.size()]), true);
+        
         // private tail steps
-        if(tailWalkStart!=null) {
+        // skip if head walk end at destination (we didnt have transit step)
+        if(tailWalkStart!=null && !(headWalkEnd!=null && headWalkEnd.equals(route.getDest().getLatLng()))) {
             LatLng end = gRoute.legs[gRoute.legs.length-1].endLocation;
             var results = walkingService.query(tailWalkStart, end);
             results.getPath().getSteps().forEach(s -> route.addStep(s));
             route.addDuration((long)(results.getPath().getEstimatedArrivalTime()*1000));
             route.setWeather(results.getWeather());
+        }
+        // update arrival time
+        route.getDest().setTime(route.getSource().getTime() + route.getDuration());
+    }
+
+    /**
+     * Render speps into route as string instructions.
+     * @param route render target
+     * @param steps steps to render
+     * @param duration add duration (onloy adds parent step duration)
+     */
+    private void addTransitSteps(Route route, DirectionsStep[] steps, boolean duration) {
+        for(var step : steps) {
+            var td = step.transitDetails;
+            if(td !=null) {
+                route.addStep(String.format("At %s, board %s %s heading to %s.",
+                    td.departureStop.name,
+                    td.line.vehicle.name, td.line.shortName,
+                    td.headsign));
+                route.addStep(String.format("%d stops.",
+                    td.numStops));
+                route.addStep(String.format("Get off at stop %s.",
+                    td.arrivalStop.name));
+            } else {
+                route.addStep(step.htmlInstructions);
+            }
+            if(duration) {
+                route.addDuration(step.duration.inSeconds*1000);
+            }
+            if(step.steps!=null) {
+                addTransitSteps(route, step.steps, false);
+            }
         }
     }
 }

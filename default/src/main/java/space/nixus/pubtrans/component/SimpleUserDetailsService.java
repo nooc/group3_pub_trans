@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import space.nixus.pubtrans.service.UserService;
 
 @Component
-public class SimpleUserDetailsService implements UserDetailsService{
+public final class SimpleUserDetailsService implements UserDetailsService{
 
     @Autowired
     UserService userService;

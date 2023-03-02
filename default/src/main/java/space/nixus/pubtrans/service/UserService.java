@@ -4,6 +4,7 @@ import space.nixus.pubtrans.error.UserExistsError;
 import space.nixus.pubtrans.error.UserNotFoundError;
 import space.nixus.pubtrans.model.User;
 import space.nixus.pubtrans.model.UserParams;
+import space.nixus.pubtrans.repository.FavoredRepository;
 import space.nixus.pubtrans.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +13,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService {
+public final class UserService {
+
+    private static final List<String> ROLES = List.of("ADMIN", "USER");
 
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    FavoredRepository favoredRepository;
 
     public List<User> getUsers() {
         var users = new ArrayList<User>();
@@ -24,9 +29,7 @@ public class UserService {
     }
 
     public List<String> getRoles() {
-        var roles = new ArrayList<String>();
-        //userRepository.findAll(Sort.unsorted()).forEach(users::add);
-        return roles;
+        return ROLES;
     }
 
     public boolean exists(long id) {
@@ -43,19 +46,16 @@ public class UserService {
     }
 
     public void delete(long id) {
+        favoredRepository.deleteByUserId(id);
         userRepository.deleteById(id);
     }
 
     public User update(long id, UserParams params) {
         var userOpt = userRepository.findById(id);
         if(userOpt.isPresent()) {
-            return update(userOpt.get().update(params));
+            return userRepository.save(userOpt.get().update(params));
         }
         throw new UserNotFoundError(id);
-    }
-
-    public User update(User user) {
-        return userRepository.save(user);
     }
 
     public User findByUsername(String username) {

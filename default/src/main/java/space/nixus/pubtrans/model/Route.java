@@ -15,6 +15,7 @@ public class Route implements Serializable {
 
     @AllArgsConstructor
     @Getter
+    @Setter
     public static class AddressPoint implements Serializable {
         private String adress;
         private LatLng latLng;

@@ -1,7 +1,7 @@
 spring:
   profiles:
     active:
-      - dev
+      - prod
       - endpoints
   security:
     filter:
@@ -16,5 +16,5 @@ space:
     pubtrans:
       challenge-minutes: 2
       issuer: space.nixus.micro-services-378415
-      expiry-minutes: 120
+      expiry-minutes: 10080 # a week
       unique: 7beb1f70-b96f-4b41-841a-acf5e2da6586

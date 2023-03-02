@@ -14,7 +14,7 @@ public class Alert extends AlertParam {
 
     /**
      * @param description
-     * @param expires
+     * @param expires epoc millis
      * @param routeId
      */
     public Alert(Long id, String description, Long expires) {

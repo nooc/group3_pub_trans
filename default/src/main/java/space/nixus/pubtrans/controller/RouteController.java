@@ -22,7 +22,7 @@ import space.nixus.pubtrans.error.*;
 
 @RestController
 @SecurityRequirement(name = "bearer")
-public class RouteController {
+public final class RouteController {
 
     @Autowired
     private RouteService routeService;
@@ -30,9 +30,9 @@ public class RouteController {
     private User getUser() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         if(auth != null) {
-            var details = auth.getDetails();
-            if(details != null) {
-                return (User)details;
+            var principal = auth.getPrincipal();
+            if(principal != null && principal instanceof User ) {
+                return (User)principal;
             }
         }
         throw new UserNotFoundError();

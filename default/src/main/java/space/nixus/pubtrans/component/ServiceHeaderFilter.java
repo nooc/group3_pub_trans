@@ -13,27 +13,40 @@ import space.nixus.pubtrans.model.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.beans.factory.annotation.Value;
+import space.nixus.pubtrans.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
  * Authorize requests with the header.
  */
 @Component
-public class ServiceHeaderFilter extends OncePerRequestFilter {
+public final class ServiceHeaderFilter extends OncePerRequestFilter {
 
-    private static final String HEADER = "X-Appengine-Cron";
+    private static final String[] HEADERS = {"X-Appengine-Cron"};
+
+    @Autowired
+    private UserRepository userRepository;
+    @Value("${ADMIN_USER}")
+    private String adminUser;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
-        if(request.getHeader(HEADER) != null) {
-            // Get user identity and set it on the spring security context
-            User user = new User(null, "admin@admin", null, "ADMIN", true);
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        // find any of HEADERS
+        for(var header : HEADERS) {
+            var headerContent = request.getHeader(header);
+            if(headerContent != null) {
+                // Get admin identity and set it on the spring security context
+                User user = userRepository.findByEmail(adminUser).get(0);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                break;
+            }
         }
         filterChain.doFilter(request, response);
     }

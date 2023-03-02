@@ -8,9 +8,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import space.nixus.pubtrans.component.JwtTokenFilter;
 import space.nixus.pubtrans.component.SimpleUserDetailsService;
@@ -24,12 +21,12 @@ public class WebSecurityConfig {
     @Autowired
     private JwtTokenFilter jwtTokenFilter;
     @Autowired
-    private ServiceHeaderFilter specialHeader;
+    private ServiceHeaderFilter serviceHeaderFilter;
     
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            // Enable COR. Disable CSRF.
-        return http.cors().and().csrf().disable()
+        // Disable CSRF.
+        return http.csrf().disable()
             // Set session management to stateless
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -47,7 +44,7 @@ public class WebSecurityConfig {
             // Set permissions on endpoints
             .authorizeHttpRequests()
             // Public
-            .requestMatchers("/swagger", "/swagger-ui","/swagger-ui/**", "/v3/**", "/auth/*")
+            .requestMatchers("/swagger", "/swagger-ui","/swagger-ui/**", "/v3/**", "/auth/**")
             .permitAll()
             // Admin
             .requestMatchers("/users/**", "/internals/**")
@@ -60,21 +57,8 @@ public class WebSecurityConfig {
                 jwtTokenFilter,
                 UsernamePasswordAuthenticationFilter.class
             )
-            .addFilterBefore(specialHeader, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(serviceHeaderFilter, JwtTokenFilter.class)
             .build();
-    }
-
-	// Used by Spring Security if CORS is enabled.
-    @Bean
-    CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("*");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
     }
 
     @Bean

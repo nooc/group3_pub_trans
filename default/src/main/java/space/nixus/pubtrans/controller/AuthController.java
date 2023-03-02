@@ -1,6 +1,7 @@
 package space.nixus.pubtrans.controller;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.Map;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import space.nixus.pubtrans.repository.ChallengeRepository;
 import space.nixus.pubtrans.service.UserService;
-import space.nixus.pubtrans.component.Cryptic;
+import space.nixus.pubtrans.interfaces.ICryptic;
 import space.nixus.pubtrans.error.InternalError;
 import space.nixus.pubtrans.error.ExpiredError;
 import space.nixus.pubtrans.error.UnauthorizedError;
@@ -27,7 +28,7 @@ import space.nixus.pubtrans.model.TokenResponse;
 import space.nixus.pubtrans.model.User;
 
 @RestController
-public class AuthController {
+public final class AuthController {
 
     @Autowired
     private Logger logger;
@@ -36,7 +37,7 @@ public class AuthController {
     @Autowired
     private ChallengeRepository challengeRepository;
     @Autowired
-    private Cryptic cryptic;
+    private ICryptic cryptic;
     @Value("${space.nixus.pubtrans.challenge-minutes:10}")
     private int challengeMinutes;
     @Value("${space.nixus.pubtrans.issuer:space.nixus}")
@@ -97,7 +98,7 @@ public class AuthController {
                             .withClaim("username", user.getEmail())
                             .withClaim("unique", jwtUnique)
                             .withIssuer(issuer)
-                            .withExpiresAt(Instant.now().plusSeconds(expiryMinutes*60))
+                            .withExpiresAt(Instant.now().plus(expiryMinutes, ChronoUnit.MINUTES))
                             .sign(getAlgorithm())
                             );
                     }

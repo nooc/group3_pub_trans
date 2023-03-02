@@ -16,10 +16,15 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @SecurityRequirement(name = "bearer")
-public class UserController {
+public final class UserController {
 
     @Autowired
     UserService userService;
+
+    @GetMapping("/users/roles/list")
+    List<String> listRoles() {
+        return userService.getRoles();
+    }
 
     @GetMapping("/users/list")
     List<User> listUsers() {

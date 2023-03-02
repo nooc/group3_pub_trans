@@ -13,6 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RouteQuery implements Serializable {
     
+    @Unindexed
     private String source;
+    @Unindexed
     private String destination;
 }

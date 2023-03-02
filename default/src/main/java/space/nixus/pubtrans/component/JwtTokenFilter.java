@@ -21,49 +21,58 @@ import jakarta.servlet.http.HttpServletResponse;
 import space.nixus.pubtrans.error.UnauthorizedError;
 import space.nixus.pubtrans.model.User;
 import space.nixus.pubtrans.repository.UserRepository;
+import space.nixus.pubtrans.interfaces.ICryptic;
 
 @Component
-public class JwtTokenFilter extends OncePerRequestFilter {
-
+public final class JwtTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private Logger logger;
     @Autowired
-    private Cryptic cryptic;
+    private ICryptic cryptic;
     @Value("${space.nixus.pubtrans.issuer:space.nixus}")
     private String issuer;
     // An easy way to invalidate existing tokens by changing this value.
     @Value("${space.nixus.pubtrans.unique:space.nixus}")
-    private String jwtUnique; 
+    private String jwtUnique;
 
-
+    /**
+     * 
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        // Get authorization header and validate
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
+        // Get authorization header
+        String headerContent = request.getHeader(HttpHeaders.AUTHORIZATION);
+        // Validate
+        if (headerContent != null && headerContent.startsWith("Bearer ")) {
+            // Get jwt token and validate
+            try {
+                var token = verifyAndDecode(headerContent.substring(7).trim());
+                if (token != null) {
+                    // Get user identity and set it on the spring security context
+                    User user = userRepository.findByEmail(token.getClaim("username").asString()).get(0);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user,
+                            null, user.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (UnauthorizedError ex) {
+                // invalid token
+            }
         }
-        // Get jwt token and validate
-        var token = verifyAndDecode(header.substring(7).trim());
-        if (token == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        // Get user identity and set it on the spring security context
-        User user = userRepository.findByEmail(token.getClaim("username").asString()).get(0);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         filterChain.doFilter(request, response);
     }
 
-    private DecodedJWT verifyAndDecode(String token) throws UnauthorizedError {
+    /**
+     * 
+     * @param jwt token
+     * @return decoded token
+     * @throws UnauthorizedError
+     */
+    private DecodedJWT verifyAndDecode(String jwt) throws UnauthorizedError {
         try {
             Algorithm algorithm = Algorithm.RSA256(cryptic.getPubKey(), cryptic.getPrivKey());
             JWTVerifier verifier = JWT.require(algorithm)
@@ -72,7 +81,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     .withClaim("unique", jwtUnique)
                     // reusable verifier instance
                     .build();
-            return verifier.verify(token);
+            return verifier.verify(jwt);
         } catch (Exception ex) {
             logger.info(ex.getMessage());
         }
