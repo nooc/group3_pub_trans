@@ -3,7 +3,10 @@ from typing import Any
 import requests
 from requests.auth import AuthBase
 
-__BASE = 'http://localhost:8080'
+__BASE_L = 'http://localhost:8080'
+__BASE_R = 'https://micro-services-378415.appspot.com'
+__BASE = __BASE_L
+
 __AUTH:AuthBase = None
 
 class HTTPBearerAuth(AuthBase):
@@ -37,6 +40,11 @@ def get(endpoint, data=None) -> Any: return request('GET', endpoint=endpoint, da
 def put(endpoint, data=None) -> Any: return request('PUT', endpoint=endpoint, data=data)
 def post(endpoint, data=None) -> Any: return request('POST', endpoint=endpoint, data=data)
 def delete(endpoint, data=None) -> Any: return request('DELETE', endpoint=endpoint, data=data)
+
+def set_remote(remote:bool=True) -> None:
+    global __BASE, __BASE_L, __BASE_R
+    if remote: __BASE = __BASE_R
+    else: __BASE = __BASE_L
 
 def set_auth(token):
     global __AUTH
