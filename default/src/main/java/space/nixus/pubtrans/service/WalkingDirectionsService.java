@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -15,6 +16,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Query walking directions from external service.
+ * Service uri from: group3.services.walking.uri
+ */
 @Service
 public final class WalkingDirectionsService {
 
@@ -87,7 +92,7 @@ public final class WalkingDirectionsService {
     private Logger logger;
     @Value("${group3.services.walking.uri}")
     private String serviceUri;
-    @Value("${group3.services.walking.key}")
+    @Value("${WALKING_KEY}")
     private String serviceKey;
     private final WebClient client;
 
@@ -99,24 +104,25 @@ public final class WalkingDirectionsService {
 
     public Response query(LatLng source, LatLng dest) {
 
-        // TODO enable when masadan is ready
-        /*
-        var responseEntity = client.post()
-            .uri("/walk_path")
-            .bodyValue(new Request(source.lat, source.lng, dest.lat, dest.lng, serviceKey))
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .toEntity(Response.class).block();
+        try{
+            var responseEntity = client.post()
+                .uri("/walk_path")
+                .bodyValue(new Request(source.lat, source.lng, dest.lat, dest.lng, serviceKey))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(Response.class).block();
+            return responseEntity.getBody();
+        } catch(Exception ex) {
+            logger.error("Query to /walk_path", ex);
+        }
 
-        return responseEntity.getBody();
-        */
+        // TODO remove dummy
         var mapper = new ObjectMapper();
         try {
             return mapper.readValue(DUMMY_RESP, Response.class);
         } catch (Exception ex) {
             logger.error("WalkingDirectionsService", ex);
         }
-
         // Error steps
         return new Response(new Path(
             new Destination(0, 0, 0, 0, 0, serviceKey, "walk"),

@@ -18,6 +18,7 @@ import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
 
 import space.nixus.pubtrans.error.AlertNotFoundError;
+import space.nixus.pubtrans.error.RouteNotFound;
 import space.nixus.pubtrans.model.Alert;
 import space.nixus.pubtrans.model.AlertParam;
 import space.nixus.pubtrans.model.FavoredRoute;
@@ -57,7 +58,7 @@ public final class RouteService {
             .mode(TravelMode.TRANSIT)
             .awaitIgnoreError();
         if(result==null) {
-            throw new InternalError();
+            throw new RouteNotFound();
         }
         // get MAX_RESULT_COUNT routes
         int count = 0;

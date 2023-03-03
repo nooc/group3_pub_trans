@@ -4,8 +4,13 @@ Microservices school project for the course *Backend programming in Java and Spr
 
 ## About
 
-This repository contains microservices.
-The **default** (and currently only) service is running on *Google App Engine* standard with *Java17* runtime.
+The whole project consists of three interacting microservices, individual transit, group transit and public transit.
+
+A link to all three can ge found in this repository under services (submodules):
+
+https://github.com/nooc/group3-config
+
+This repository contains the *public transit* microservice in **default** folder. It runs on *Google App Engine* standard with *Java17* runtime.
 
 **default** is written using String Boot and use Googles Datastore as data backend.
 
