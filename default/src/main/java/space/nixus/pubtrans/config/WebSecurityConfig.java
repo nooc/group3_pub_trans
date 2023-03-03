@@ -31,16 +31,6 @@ public class WebSecurityConfig {
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
-            // Unauthorized requests exception handler
-            .exceptionHandling()
-            .authenticationEntryPoint(
-                (request, response, ex) -> {
-                    response.sendError(
-                        HttpServletResponse.SC_UNAUTHORIZED,
-                        ex.getMessage()
-                    );
-                })
-            .and()
             // Set permissions on endpoints
             .authorizeHttpRequests()
             // Public
