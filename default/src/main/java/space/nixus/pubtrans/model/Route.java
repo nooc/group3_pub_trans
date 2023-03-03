@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Route query response.
+ */
 @Getter
 @Setter
 public class Route implements Serializable {
@@ -41,9 +44,6 @@ public class Route implements Serializable {
         this.steps = new ArrayList<>();
     }
 
-    /**
-     * 
-     */
     public Route() {
         super();
         this.created = Instant.now().toEpochMilli();

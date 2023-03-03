@@ -11,9 +11,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AlertParam {
+    
     // alert description
     @Unindexed
     private String description;
-    // epoc millis
-    private Long expires;
+    private Long expires; // epoc millis
 }

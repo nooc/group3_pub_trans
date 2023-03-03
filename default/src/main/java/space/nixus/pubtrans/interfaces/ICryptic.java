@@ -3,6 +3,9 @@ package space.nixus.pubtrans.interfaces;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+/**
+ * Cryptic interface for RSA encryption/decryption.
+ */
 public interface ICryptic {
     
     RSAPublicKey getPubKey();

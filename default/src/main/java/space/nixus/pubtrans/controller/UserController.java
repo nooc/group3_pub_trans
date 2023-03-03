@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+/**
+ * User admin controller.
+ * 
+ * See /swagger
+ */
 @RestController
 @SecurityRequirement(name = "bearer")
 public final class UserController {

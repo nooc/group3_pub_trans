@@ -11,6 +11,9 @@ import com.google.maps.GeoApiContext;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * General app configurations.
+ */
 @Configuration
 @Log4j2
 public class AppConfig {
@@ -18,11 +21,19 @@ public class AppConfig {
     @Value("${MAPS_KEY}")
     private String mapsKey;
 
+    /**
+     * Logger instance.
+     * @return
+     */
     @Bean
     Logger getLogger() {
         return log;
     }
 
+    /**
+     * Google GeoApiContext instance.
+     * @return
+     */
     @Bean
     GeoApiContext getGeoApiContext() {
         return new GeoApiContext.Builder()

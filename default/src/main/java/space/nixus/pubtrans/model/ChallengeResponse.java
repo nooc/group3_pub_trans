@@ -9,7 +9,7 @@ import com.google.cloud.spring.data.datastore.core.mapping.Unindexed;
 public class ChallengeResponse extends ChallengeParam {
     
     @Unindexed
-    private String encrypted;
+    private String encrypted; // encrypted ChallengeParam.value
     
     public ChallengeResponse() { super(); }
     public ChallengeResponse(String plain, String encrypted) {

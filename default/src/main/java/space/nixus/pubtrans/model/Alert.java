@@ -12,19 +12,11 @@ public class Alert extends AlertParam {
     @Id
     private Long id;
 
-    /**
-     * @param description
-     * @param expires epoc millis
-     * @param routeId
-     */
     public Alert(Long id, String description, Long expires) {
         super(description, expires);
         this.id = id;
     }
 
-    /**
-     * 
-     */
     public Alert() {
         super();
         this.id = null;

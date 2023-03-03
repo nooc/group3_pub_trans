@@ -21,6 +21,10 @@ public class App {
         builder.run(args);
     }
 
+    /**
+     * Redirect to swagger.
+     * @return
+     */
     @GetMapping("/swagger")
     String redirect_1() {
         return "redirect:/swagger-ui/index.html";

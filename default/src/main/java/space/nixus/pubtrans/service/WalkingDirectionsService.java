@@ -17,12 +17,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * Query walking directions from external service.
- * Service uri from: group3.services.walking.uri
+ * Service for querying walking directions from external service.
  */
 @Service
 public final class WalkingDirectionsService {
 
+    /**
+     * Dummy response if remote service call fails.
+     * TODO Remove when remote service is fixed
+     */
     private static final String DUMMY_RESP ="""
         {
             "path": {
@@ -48,6 +51,8 @@ public final class WalkingDirectionsService {
             },
             "weather": "Fog"
         }""";
+
+    // models for remote service response
 
     @AllArgsConstructor
     public static final class Request {
@@ -96,12 +101,21 @@ public final class WalkingDirectionsService {
     private String serviceKey;
     private final WebClient client;
 
+    /**
+     * Construct creating web client.
+     */
     public WalkingDirectionsService() {
         this.client = WebClient.builder()
             .baseUrl(serviceUri)
             .build();
     }
 
+    /**
+     * Query directions
+     * @param source
+     * @param dest
+     * @return Response or null
+     */
     public Response query(LatLng source, LatLng dest) {
 
         try{

@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import space.nixus.pubtrans.App;
 import space.nixus.pubtrans.interfaces.IResourceRetriever;
 
+/**
+ * Get embedded resources using class loader.
+ */
 @Component()
 public final class ResourceRetriever implements IResourceRetriever {
 

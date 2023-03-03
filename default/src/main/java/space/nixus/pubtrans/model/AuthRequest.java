@@ -12,5 +12,6 @@ import lombok.Setter;
 @Setter
 public class AuthRequest implements Serializable {
     
+    // username
     private String user;
 }

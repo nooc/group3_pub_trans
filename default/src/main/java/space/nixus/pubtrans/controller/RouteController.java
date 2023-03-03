@@ -20,6 +20,10 @@ import space.nixus.pubtrans.model.User;
 import space.nixus.pubtrans.service.RouteService;
 import space.nixus.pubtrans.error.*;
 
+/**
+ * Main api controller with /routes and /alerts endpoints.
+ * See /swagger
+ */
 @RestController
 @SecurityRequirement(name = "bearer")
 public final class RouteController {

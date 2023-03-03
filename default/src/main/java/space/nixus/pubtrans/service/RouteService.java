@@ -2,11 +2,9 @@ package space.nixus.pubtrans.service;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.threeten.bp.Instant;
 
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
@@ -27,6 +25,9 @@ import space.nixus.pubtrans.model.RouteQuery;
 import space.nixus.pubtrans.repository.AlertRepository;
 import space.nixus.pubtrans.repository.FavoredRepository;
 
+/**
+ * Main api service.
+ */
 @Service
 public final class RouteService {
 

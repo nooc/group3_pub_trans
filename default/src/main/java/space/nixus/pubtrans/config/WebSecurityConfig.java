@@ -8,21 +8,30 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import space.nixus.pubtrans.component.JwtTokenFilter;
 import space.nixus.pubtrans.component.SimpleUserDetailsService;
 import space.nixus.pubtrans.component.ServiceHeaderFilter;
 
-// https://www.toptal.com/spring/spring-security-tutorial
 
+/**
+ * Security configurations.
+ */
 @Configuration
 public class WebSecurityConfig {
 	
+    // Bearer token filter.
     @Autowired
     private JwtTokenFilter jwtTokenFilter;
+    // Internal requests filter.
     @Autowired
     private ServiceHeaderFilter serviceHeaderFilter;
     
+    /**
+     * Set up HttpSecurity
+     * @param http
+     * @return
+     * @throws Exception
+     */
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Disable CSRF.
@@ -39,7 +48,7 @@ public class WebSecurityConfig {
             // Admin
             .requestMatchers("/users/**", "/internals/**")
             .hasAnyRole("ADMIN")
-            // Private endpoints
+            // Private
             .anyRequest().authenticated()
             .and()
             // JWT token filter
@@ -47,10 +56,15 @@ public class WebSecurityConfig {
                 jwtTokenFilter,
                 UsernamePasswordAuthenticationFilter.class
             )
+            // Internal requests filter
             .addFilterBefore(serviceHeaderFilter, JwtTokenFilter.class)
             .build();
     }
 
+    /**
+     * Out simple user details.
+     * @return
+     */
     @Bean
     UserDetailsService getUserDetailsService() {
         return new SimpleUserDetailsService();

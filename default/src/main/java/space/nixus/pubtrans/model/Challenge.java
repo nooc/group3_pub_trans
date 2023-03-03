@@ -6,6 +6,9 @@ import com.google.cloud.spring.data.datastore.core.mapping.Unindexed;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Authentication challenge.
+ */
 @Getter
 @Setter
 @Entity(name = "challenge")
@@ -15,7 +18,7 @@ public class Challenge extends ChallengeResponse {
     private Long id;
     @Unindexed
     private Long userId;
-    private Long expires;
+    private Long expires; // epoc millis
     
     public Challenge() { super(); }
     public Challenge(Long id, Long userId, String plain, String encrypted, long expires) {

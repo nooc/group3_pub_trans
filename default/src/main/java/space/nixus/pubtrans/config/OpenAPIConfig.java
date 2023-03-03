@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 
+/**
+ * Swagger configuration for setting bearer requirement for controllers.
+ */
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "Public Transportation API", version = "v1"))
 @SecurityScheme(

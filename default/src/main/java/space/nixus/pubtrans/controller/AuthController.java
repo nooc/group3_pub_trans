@@ -27,6 +27,10 @@ import space.nixus.pubtrans.model.AuthRequest;
 import space.nixus.pubtrans.model.TokenResponse;
 import space.nixus.pubtrans.model.User;
 
+/**
+ * Authentication controller for handling the challenge authentication flow.
+ * See /swagger
+ */
 @RestController
 public final class AuthController {
 
@@ -49,6 +53,12 @@ public final class AuthController {
     private long expiryMinutes;
     private Algorithm algorithm = null;
     
+    /**
+     * Request challenge.
+     * See /swagger
+     * @param request
+     * @return
+     */
     @PostMapping("/auth/request")
     ChallengeParam requestChallenge(@RequestBody AuthRequest request) {
         User user = userService.findByUsername(request.getUser());
@@ -57,17 +67,20 @@ public final class AuthController {
             throw new UserNotFoundError();
         }
         try {
-            // Delete expired.
+            // Delete expired
+            // TODO move to internals
             var keys = challengeRepository.findExpired(now.toEpochMilli());
             var ids = new ArrayList<Long>();
             keys.stream().forEach( key -> ids.add(key.getId()) );
             challengeRepository.deleteAllById(ids);
-            // Challenge
+            // Create challenge
             var plain = UUID.randomUUID().toString();
             var crypted = cryptic.encrypt(plain);
             var expires = now.plusSeconds(challengeMinutes * 60).toEpochMilli();
             var challenge = new Challenge(null, user.getId(), plain, crypted, expires);
+            // store
             challenge = challengeRepository.save(challenge);
+            // return challenge value
             return new ChallengeParam(challenge.getValue());
         } catch(Exception ex) {
             logger.error("requestChallenge", ex);
@@ -75,20 +88,31 @@ public final class AuthController {
         }
     }
 
+    /**
+     * Validate auth challenge response.
+     * See /swagger
+     * @param response
+     * @return
+     */
     @PostMapping("/auth/validate")
     TokenResponse validateChallenge(@RequestBody ChallengeResponse response) {
         try {
-            if(response.getValue().equals(cryptic.decrypt(response.getEncrypted()))) {
-                var challenges = challengeRepository.findByValue(response.getValue());
-                if(challenges.size() != 0) {
-                    var challenge = challenges.get(0);
+            // find challenge
+            var challenges = challengeRepository.findByValue(response.getValue());
+            if(challenges.size() != 0) {
+                var challenge = challenges.get(0);
+                // check response.decrypted against challenge.value
+                if(cryptic.decrypt(response.getEncrypted()).equals(challenge.getValue())) {
                     // Expired?
                     if(Instant.ofEpochMilli(challenge.getExpires()).isBefore(Instant.now())) {
                         throw new ExpiredError();
                     }
+                    // Get user
                     User user = userService.findById(challenge.getUserId());
                     if(user!=null) {
+                        // remove challenge
                         challengeRepository.delete(challenge);
+                        // return new token
                         return new TokenResponse(
                             JWT.create()
                             .withHeader(Map.of(
@@ -111,6 +135,10 @@ public final class AuthController {
         throw new InternalError();
     }
 
+    /**
+     * Get algorith instance for sign and verify. 
+     * @return
+     */
     private Algorithm getAlgorithm() {
         if(algorithm == null) {
             algorithm = Algorithm.RSA256(cryptic.getPubKey(), cryptic.getPrivKey());
