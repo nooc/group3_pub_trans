@@ -1,8 +1,4 @@
 spring:
-  profiles:
-    active:
-      - prod
-      - endpoints
   security:
     filter:
       order: 10
