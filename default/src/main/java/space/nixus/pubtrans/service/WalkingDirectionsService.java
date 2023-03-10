@@ -22,36 +22,6 @@ import lombok.NoArgsConstructor;
 @Service
 public final class WalkingDirectionsService {
 
-    /**
-     * Dummy response if remote service call fails.
-     * TODO Remove when remote service is fixed
-     */
-    private static final String DUMMY_RESP ="""
-        {
-            "path": {
-                "destination": {
-                    "id": 0,
-                    "startLongitude": 12.034092,
-                    "startLatitude": 57.689697,
-                    "endLongitude": 12.016437,
-                    "endLatitude": 57.700989,
-                    "owner": "fatso",
-                    "movementType": "walk"
-                },
-                "estimatedArrivalTime": 1250.6,
-                "steps": [
-                    "After 63.0m Head northwest",
-                    "After 530.6m Keep left onto Storatorpsvägen",
-                    "After 728.0m Turn slight right onto Storatorpsvägen",
-                    "After 346.3m Keep left",
-                    "After 32.4m Turn right",
-                    "After 36.5m Turn left",
-                    "After 0.0m Arrive at your destination, on the left"
-                ]
-            },
-            "weather": "Fog"
-        }""";
-
     // models for remote service response
 
     @AllArgsConstructor
@@ -118,7 +88,7 @@ public final class WalkingDirectionsService {
      */
     public Response query(LatLng source, LatLng dest) {
 
-        try{
+        try {
             var responseEntity = client.post()
                 .uri("/walk_path")
                 .bodyValue(new Request(source.lat, source.lng, dest.lat, dest.lng, serviceKey))
@@ -129,20 +99,12 @@ public final class WalkingDirectionsService {
         } catch(Exception ex) {
             logger.error("Query to /walk_path", ex);
         }
-
-        // TODO remove dummy
-        var mapper = new ObjectMapper();
-        try {
-            return mapper.readValue(DUMMY_RESP, Response.class);
-        } catch (Exception ex) {
-            logger.error("WalkingDirectionsService", ex);
-        }
-        // Error steps
+        // Empty steps
         return new Response(new Path(
-            new Destination(0, 0, 0, 0, 0, serviceKey, "walk"),
+            new Destination(0, source.lng, source.lat, dest.lng, dest.lat, serviceKey, "walk"),
             0,
-            List.of("error")
+            List.of("Error")
         ),
-        "error");
+        "Error");
     }
 }
